@@ -405,5 +405,6 @@ export const PatientManager: React.FC<PatientManagerProps> = ({ patients, record
           </table>
         </div>
       </div>
+     </div>
     );
 };
