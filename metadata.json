@@ -1,0 +1,8 @@
+{
+  "name": "DentalCore Manager",
+  "description": "A comprehensive management system for dental clinics. Features include: Clinical Records with Versioning, Treatment Plans & Budgeting, Student/Tutor Education Module, Social Service Management, Factus Billing, and AI-assisted summaries.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
