@@ -1,7 +1,9 @@
 export enum UserRole {
   ADMIN = 'admin',
   DENTIST = 'dentist',
-  STUDENT = 'student',
+
+  STUDENT = 'student', // For social service/internships
+
   RECEPTIONIST = 'receptionist'
 }
 
@@ -12,7 +14,10 @@ export interface User {
   role: UserRole;
   specialty?: string;
   avatar?: string;
+
   commissionRate?: number; // Porcentaje de comisión (ej: 0.30 = 30%)
+
+
 }
 
 export interface Patient {
@@ -23,6 +28,7 @@ export interface Patient {
   phone: string;
   email: string;
   address: string;
+
   socialService: boolean;
   medicalHistory: string[];
   allergies: string[];
@@ -31,6 +37,11 @@ export interface Patient {
     phone: string;
     relationship: string;
   };
+
+  socialService: boolean; // Is this a community service case?
+  medicalHistory: string[];
+  allergies: string[];
+
 }
 
 export interface ClinicalEntry {
@@ -41,23 +52,37 @@ export interface ClinicalEntry {
   procedure: string;
   notes: string;
   teethInvolved?: number[];
+
   attachments: string[];
   version: number;
   isLocked: boolean;
   status?: 'draft' | 'final';
   diagnosis?: string; // Código CIE-10
+
+  attachments: string[]; // URLs to Rx/Photos
+  version: number; // For auditing changes
+  isLocked: boolean; // If true, cannot be edited
+  status?: 'draft' | 'final';
+
 }
 
 export interface Appointment {
   id: string;
   patientId: string;
   dentistId: string;
+
   date: string;
   duration: number;
   status: 'scheduled' | 'completed' | 'cancelled' | 'no-show' | 'confirmed';
   type: 'checkup' | 'treatment' | 'emergency' | 'social-service';
   confirmedAt?: string;
   cancelReason?: string;
+
+  date: string; // ISO string
+  duration: number; // minutes
+  status: 'scheduled' | 'completed' | 'cancelled' | 'no-show';
+  type: 'checkup' | 'treatment' | 'emergency' | 'social-service';
+
 }
 
 export interface InventoryItem {
@@ -68,9 +93,11 @@ export interface InventoryItem {
   unit: string;
   minThreshold: number;
   expiryDate?: string;
+
   supplierId?: string;
   lastRestockDate?: string;
   costPerUnit?: number;
+
 }
 
 export interface Invoice {
@@ -78,6 +105,7 @@ export interface Invoice {
   patientId: string;
   date: string;
   amount: number;
+
   status: 'pending' | 'paid' | 'factus_submitted' | 'partially_paid';
   items: { description: string; price: number; serviceId?: string }[];
   electronicInvoiceCode?: string;
@@ -92,13 +120,30 @@ export interface TreatmentPlan {
   totalCost: number;
   status: 'active' | 'completed' | 'draft' | 'cancelled';
   createdDate: string;
+
+  status: 'pending' | 'paid' | 'factus_submitted';
+  items: { description: string; price: number }[];
+  electronicInvoiceCode?: string; // CUFE from Factus
+}
+
+// --- NEW TYPES FOR EXTENDED MODULES ---
+
+export interface TreatmentPlan {
+  id: string;
+  patientId: string;
+  name: string; // e.g. "Ortodoncia Fase 1"
+  totalCost: number;
+  status: 'active' | 'completed' | 'draft';
+
   stages: {
     id: string;
     description: string;
     cost: number;
     status: 'pending' | 'in_progress' | 'done';
+
     teethInvolved?: number[];
     scheduledDate?: string;
+
   }[];
 }
 
@@ -109,21 +154,29 @@ export interface Consent {
   content: string;
   signedAt?: string;
   isSigned: boolean;
+
   dentistId?: string;
   procedure?: string;
+
 }
 
 export interface StudentLog {
   id: string;
   studentId: string;
+
   tutorId: string;
+
+  tutorId: string; // The dentist responsible
+
   patientId: string;
   procedure: string;
   date: string;
   status: 'pending_approval' | 'approved' | 'rejected';
   feedback?: string;
   hours: number;
+
   grade?: number; // 1-5
+
 }
 
 export interface CommunityEvent {
@@ -134,8 +187,10 @@ export interface CommunityEvent {
   responsibleId: string;
   patientsTreated: number;
   status: 'planned' | 'completed';
+
   volunteers?: string[]; // User IDs
   budget?: number;
+
 }
 
 export interface Location {
@@ -157,14 +212,19 @@ export interface ServiceItem {
   name: string;
   category: string;
   basePrice: number;
+
   duration: number;
   requiresMaterials?: string[]; // Inventory item IDs
+
+  duration: number; // standard duration in minutes
+
 }
 
 export interface ConsentTemplate {
   id: string;
   title: string;
   content: string;
+
 }
 
 // ============== NUEVOS TIPOS ==============
@@ -409,3 +469,5 @@ export interface KPI {
     patientsSeen: number;
   }[];
 }
+
+
