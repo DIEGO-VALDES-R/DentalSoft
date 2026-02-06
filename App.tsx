@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import { PatientManager } from './components/PatientManager';
@@ -8,19 +8,19 @@ import Education from './components/Education';
 import SocialService from './components/SocialService';
 import { Schedule } from './components/Schedule';
 import AdminConfig from './components/AdminConfig';
-import { MOCK_USERS, MOCK_PATIENTS, MOCK_APPOINTMENTS, MOCK_RECORDS, MOCK_INVOICES, MOCK_INVENTORY } from './constants';
-import { User, ClinicalEntry, Appointment, UserRole } from './types';
+import { MOCK_USERS, MOCK_PATIENTS, MOCK_APPOINTMENTS, MOCK_RECORDS, MOCK_INVOICES, MOCK_INVENTORY, MOCK_SERVICES } from './constants';
+import { User, ClinicalEntry, Appointment, UserRole, Invoice } from './types';
 import { Lock } from 'lucide-react';
 
-// Simple Hash Router Implementation for constraints
 const App: React.FC = () => {
-  // Global State (Simulating DB)
+  // Global State
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [view, setView] = useState('dashboard');
   
   // Data State
   const [records, setRecords] = useState<ClinicalEntry[]>(MOCK_RECORDS);
   const [appointments, setAppointments] = useState<Appointment[]>(MOCK_APPOINTMENTS);
+  const [invoices, setInvoices] = useState<Invoice[]>(MOCK_INVOICES);
   
   // Login State
   const [email, setEmail] = useState('admin@dentalcore.com');
@@ -28,7 +28,6 @@ const App: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple mock auth
     const user = MOCK_USERS.find(u => u.email === email);
     if (user) {
       setCurrentUser(user);
@@ -54,16 +53,24 @@ const App: React.FC = () => {
     setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
   };
 
-  // Get Dentists and Students for Schedule filtering
+  // ✅ NUEVOS HANDLERS PARA BILLING
+  const handleAddInvoice = (invoice: Invoice) => {
+    setInvoices(prev => [...prev, invoice]);
+  };
+
+  const handleUpdateInvoice = (id: string, updates: Partial<Invoice>) => {
+    setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, ...updates } : inv));
+  };
+
   const staff = MOCK_USERS.filter(u => u.role === UserRole.DENTIST || u.role === UserRole.STUDENT || u.role === UserRole.ADMIN);
 
-  // Render View based on state
   const renderContent = () => {
     if (!currentUser) return null;
 
     switch (view) {
       case 'dashboard':
-        return <Dashboard user={currentUser} appointments={appointments} invoices={MOCK_INVOICES} />;
+        return <Dashboard user={currentUser} appointments={appointments} invoices={invoices} />;
+      
       case 'patients':
       case 'records': 
         return <PatientManager 
@@ -72,14 +79,25 @@ const App: React.FC = () => {
                   currentUser={currentUser}
                   onAddRecord={handleAddRecord} 
                 />;
+      
       case 'billing':
-        return <Billing invoices={MOCK_INVOICES} />;
+        return <Billing 
+                  invoices={invoices}
+                  patients={MOCK_PATIENTS}
+                  services={MOCK_SERVICES}
+                  onAddInvoice={handleAddInvoice}
+                  onUpdateInvoice={handleUpdateInvoice}
+                />;
+      
       case 'inventory':
         return <Inventory items={MOCK_INVENTORY} />;
+      
       case 'education':
         return <Education currentUser={currentUser} />;
+      
       case 'social':
         return <SocialService />;
+      
       case 'schedule':
         return <Schedule 
                   appointments={appointments} 
@@ -89,10 +107,12 @@ const App: React.FC = () => {
                   onAddAppointment={handleAddAppointment}
                   onUpdateStatus={handleUpdateStatus}
                 />;
+      
       case 'admin':
-         return <AdminConfig />;
+        return <AdminConfig />;
+      
       default:
-        return <Dashboard user={currentUser} appointments={appointments} invoices={MOCK_INVOICES} />;
+        return <Dashboard user={currentUser} appointments={appointments} invoices={invoices} />;
     }
   };
 
